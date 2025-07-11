@@ -1,14 +1,24 @@
+import os
+from dotenv import load_dotenv
 import tweepy
 
-# Replace with your credentials
-bearer_token = "YOUR_BEARER_TOKEN"
+load_dotenv()
+BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN")
 
-# Authenticate
-client = tweepy.Client(bearer_token=bearer_token)
+if not BEARER_TOKEN:
+    raise ValueError("TWITTER_BEARER_TOKEN environment variable not set. Please set it in your shell or .env file.")
 
-# Retrieve a tweet by its ID
-tweet_id = "1674822258647527424"
-tweet = client.get_tweet(tweet_id, expansions=["author_id"], tweet_fields=["created_at", "text"])
+client = tweepy.Client(bearer_token=BEARER_TOKEN)
 
-print("Tweet text:", tweet.data["text"])
-print("Author ID:", tweet.includes["users"][0].id)
+def fetch_tweet(tweet_id):
+    tweet = client.get_tweet(tweet_id, expansions="author_id", tweet_fields=["created_at", "text", "attachments"])
+    print(tweet.data)
+    if tweet.includes and "users" in tweet.includes:
+        print("Author:", tweet.includes["users"][0].username)
+    else:
+        print("Author information not available.")
+
+if __name__ == "__main__":
+    # Replace with your desired tweet ID
+    tweet_id = "1674822258647527424"
+    fetch_tweet(tweet_id)
